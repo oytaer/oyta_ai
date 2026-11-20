@@ -20,7 +20,7 @@ memory_pool = ["oyta-device/memory_pool"]  # 传递给 oyta-device
 debug_assertions = ["oyta-device/debug_assertions"]  # 传递给 oyta-device
 
 [dependencies]
-oyta-device = { path = "../oyta-device" }
+oyta-device = { version = "0.1.0", path = "../oyta-device" }
 rayon       = { workspace = true }
 rand        = { workspace = true }
 rand_distr  = { workspace = true }

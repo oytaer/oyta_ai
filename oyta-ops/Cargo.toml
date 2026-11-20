@@ -20,8 +20,8 @@ memory_pool = ["oyta-device/memory_pool", "oyta-core/memory_pool"]
 debug_assertions = ["oyta-device/debug_assertions", "oyta-core/debug_assertions"]
 
 [dependencies]
-oyta-core   = { path = "../oyta-core" }
-oyta-device = { path = "../oyta-device" }
+oyta-core   = { version = "0.1.0", path = "../oyta-core" }
+oyta-device = { version = "0.1.0", path = "../oyta-device" }
 rand        = { workspace = true }        # dropout + arange + rand
 rand_distr  = { workspace = true }        # rand_distr::StandardUniform
 rayon       = { workspace = true }        # reduce 并行

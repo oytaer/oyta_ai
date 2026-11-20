@@ -20,9 +20,9 @@ memory_pool = ["oyta-device/memory_pool"]  # 传递
 debug_assertions = ["oyta-core/debug_assertions", "oyta-device/debug_assertions"]  # 传递
 
 [dependencies]
-oyta-core   = { path = "../oyta-core" }
-oyta-device = { path = "../oyta-device" }
-oyta-ops    = { path = "../oyta-ops" }
+oyta-core   = { version = "0.1.0", path = "../oyta-core" }
+oyta-device = { version = "0.1.0", path = "../oyta-device" }
+oyta-ops    = { version = "0.1.0", path = "../oyta-ops" }
 
 # ---- examples 依赖 ----
 [dev-dependencies]
