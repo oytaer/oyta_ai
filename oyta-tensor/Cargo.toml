@@ -1,0 +1,28 @@
+[package]
+name = "oyta-tensor"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[features]
+default = ["cpu"]
+cpu    = ["oyta-device/cpu"]
+cuda   = ["oyta-device/cuda"]         # 传递
+metal  = ["oyta-device/metal"]         # 传递
+wgpu   = ["oyta-device/wgpu"]          # 传递
+blas   = ["oyta-device/blas"]           # 传递
+memory_pool = ["oyta-device/memory_pool"]  # 传递
+debug_assertions = ["oyta-core/debug_assertions", "oyta-device/debug_assertions"]  # 传递
+
+[dependencies]
+oyta-core   = { path = "../oyta-core" }
+oyta-device = { path = "../oyta-device" }
+oyta-ops    = { path = "../oyta-ops" }
+
+# ---- examples 依赖 ----
+[dev-dependencies]
+rand       = { workspace = true }
+rand_distr = { workspace = true }
+serde      = { workspace = true }
+serde_json = { workspace = true }

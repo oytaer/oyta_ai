@@ -1,0 +1,25 @@
+[package]
+name = "oyta-core"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[features]
+default = ["cpu"]
+cpu    = []
+cuda   = ["oyta-device/cuda"]         # 传递给 oyta-device
+metal  = ["oyta-device/metal"]         # 传递给 oyta-device
+wgpu   = ["oyta-device/wgpu"]          # 传递给 oyta-device
+blas   = ["oyta-device/blas"]          # 传递给 oyta-device
+memory_pool = ["oyta-device/memory_pool"]  # 传递给 oyta-device
+debug_assertions = ["oyta-device/debug_assertions"]  # 传递给 oyta-device
+
+[dependencies]
+oyta-device = { path = "../oyta-device" }
+rayon       = { workspace = true }
+rand        = { workspace = true }
+rand_distr  = { workspace = true }
+num-traits  = { workspace = true }   # Float trait bound
+thiserror   = { workspace = true }
+serde_json  = { workspace = true }   # safetensors JSON header 解析（Value 手动解析）

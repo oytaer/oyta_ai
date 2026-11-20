@@ -1,0 +1,33 @@
+[package]
+name = "oyta-ops"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[features]
+default = []
+cpu    = ["oyta-device/cpu", "oyta-core/cpu"]
+cuda   = ["oyta-device/cuda", "oyta-core/cuda"]
+metal  = ["oyta-device/metal", "oyta-core/metal"]
+wgpu   = ["oyta-device/wgpu", "oyta-core/wgpu"]
+blas   = ["oyta-device/blas", "oyta-core/blas"]
+memory_pool = ["oyta-device/memory_pool", "oyta-core/memory_pool"]
+debug_assertions = ["oyta-device/debug_assertions", "oyta-core/debug_assertions"]
+
+[dependencies]
+oyta-core   = { path = "../oyta-core" }
+oyta-device = { path = "../oyta-device" }
+rand        = { workspace = true }        # dropout + arange + rand
+rand_distr  = { workspace = true }        # rand_distr::StandardUniform
+rayon       = { workspace = true }        # reduce 并行
+
+[dev-dependencies]
+criterion   = "=0.8"                      # benchmark 框架
+
+# bench 配置：所有 benchmark 文件在 src/benches/ 目录下
+# Cargo 默认扫描 crate 根目录的 benches/，手动 [[bench]] 指向 src 内
+[[bench]]
+name = "matmul_bench"
+path = "src/benches/matmul_bench.rs"
+harness = false

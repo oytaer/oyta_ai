@@ -1,0 +1,46 @@
+[workspace]
+resolver = "2"
+members = [
+    "oyta-device",   # 设备抽象层（Backend trait + Cpu/Cuda/Metal/Wgpu 实现）
+    "oyta-core",     # 数据核心（Tensor + Shape + Strides + Device 标记）
+    "oyta-ops",      # 算子引擎（dispatch + broadcast + elwise + reduce + matmul + flash_attn + fuse）
+    "oyta-tensor",   # 公共 API 入口（re-export 全部）
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+license = "MIT OR Apache-2.0"
+
+# ---- 基础依赖 ----
+[workspace.dependencies]
+rayon      = "=1.12.0"                  # CPU 并行
+rand       = "=0.10.4"                  # 权重初始化 + Dropout 掩码
+rand_distr = "=0.6.0"                   # StandardNormal / Uniform
+num-traits = "=0.2.19"                  # 数值 trait bound
+thiserror  = "=2.0.20"                  # 错误类型
+serde      = { version = "=1.0.229", features = ["derive"] }  # 序列化
+serde_json = "=1.0.154"                 # JSON 解析
+
+# ---- 可选后端依赖（各 crate 自己声明 optional）----
+blas-sys   = "=0.9.0"                   # OpenBLAS/MKL 加速
+# CUDA 后端：只用 unsafe extern "C" 声明（不 link -lcuda/-lcublas），
+# 因为 WSL2 没有 cuda.so/cublas.so。有硬件时 runtime probe 会自动用 cublasSgemm。
+metal      = "0.33"                     # Metal API（macOS/iOS，可选）
+wgpu       = "30"                       # WebGPU（跨平台，可选）
+flume      = "=0.11.1"                  # 同步 channel（MapAsync 等）
+pollster   = "=1.0.3"                   # 同步 async block_on
+bytemuck   = { version = "=1.25.2", features = ["derive"] }  # 零拷贝类型转换（wgpu 配套）
+
+# ---- Release 编译优化 ----
+[profile.release]
+lto = "fat"
+codegen-units = 1
+strip = "symbols"
+opt-level = 3
+panic = "abort"
+
+[profile.release.build-override]
+opt-level = 3
+codegen-units = 1

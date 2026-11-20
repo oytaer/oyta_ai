@@ -1,0 +1,35 @@
+[package]
+name = "oyta-device"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+build = "build.rs"
+
+[build-dependencies]
+cc = { version = "=1.2", optional = true }
+
+[features]
+default = ["cpu"]
+cpu    = []
+cuda   = ["dep:cc"]                               # CUDA 后端（有 nvcc 时编译 kernels，无则 fallback）
+wgpu   = ["dep:wgpu", "dep:flume", "dep:pollster", "dep:bytemuck"]   # WebGPU 后端（跨平台 Compute Shader）
+blas   = ["dep:blas-sys"]                       # BLAS 加速（OpenBLAS/MKL）
+metal  = ["dep:metal"]                          # Apple Metal 后端（依赖在 target.cfg.dependencies 里声明，非 Apple 平台该 dep 不存在 → feature 空激活）
+memory_pool = []                                # 设备内存池
+debug_assertions = []                           # 开发期：边界检查 + NaN 检测 + debug_assert!
+
+[dependencies]
+rayon      = { workspace = true }
+thiserror  = { workspace = true }
+
+# ---- 可选后端依赖 ----
+wgpu       = { workspace = true, optional = true }
+flume      = { workspace = true, optional = true }
+pollster   = { workspace = true, optional = true }
+bytemuck   = { workspace = true, optional = true }
+blas-sys   = { workspace = true, optional = true }
+
+# metal crate 只能在 Apple 平台编译（macOS/iOS/tvOS）
+[target.'cfg(target_vendor="apple")'.dependencies]
+metal      = { workspace = true, optional = true }
