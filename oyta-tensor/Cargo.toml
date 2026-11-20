@@ -4,6 +4,10 @@ version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
+description = "Public API entry point for oyta-ai — re-exports oyta-device + oyta-core + oyta-ops with ergonomic Tensor<f32, Cpu> etc."
+repository.workspace = true
+keywords.workspace = true
+categories.workspace = true
 
 [features]
 default = ["cpu"]

@@ -4,6 +4,10 @@ version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
+description = "Operator engine for oyta-ai — matmul dispatch, FlashAttention, 4 fusion ops, pairwise_sum stability, profiling"
+repository.workspace = true
+keywords.workspace = true
+categories.workspace = true
 
 [features]
 default = []

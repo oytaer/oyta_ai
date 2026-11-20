@@ -4,6 +4,10 @@ version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
+description = "Generic backend abstraction layer for oyta-ai — one blanket impl covers f32/f16/bf16/f64 across CPU/CUDA/WGPU/Metal"
+repository.workspace = true
+keywords.workspace = true
+categories.workspace = true
 build = "build.rs"
 
 [build-dependencies]

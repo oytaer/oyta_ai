@@ -4,6 +4,10 @@ version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
+description = "Tensor core data structures for oyta-ai — DynamicShape, Strides, Device markers, safetensors I/O"
+repository.workspace = true
+keywords.workspace = true
+categories.workspace = true
 
 [features]
 default = ["cpu"]
