@@ -902,7 +902,7 @@ dependencies = [
 
 [[package]]
 name = "oyta-core"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "num-traits",
  "oyta-device",
@@ -915,7 +915,7 @@ dependencies = [
 
 [[package]]
 name = "oyta-device"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "blas-sys",
  "bytemuck",
@@ -930,7 +930,7 @@ dependencies = [
 
 [[package]]
 name = "oyta-ops"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "criterion",
  "oyta-core",
@@ -942,7 +942,7 @@ dependencies = [
 
 [[package]]
 name = "oyta-tensor"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "oyta-core",
  "oyta-device",
