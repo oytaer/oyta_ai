@@ -375,3 +375,183 @@ impl<D: Backend> Tensor<f32, D> where D: oyta_device::MatmulOps {
         Tensor::from_data(out_data, vec![batch, m, n])
     }
 }
+
+// ============================================================
+// P0：Backward API 暴露 + GRU/LSTM wrapper
+// ============================================================
+
+impl<T: Float + Clone, D: Backend> Tensor<T, D>
+where D: oyta_device::Conv1dOps<T> + oyta_device::BatchNormOps<T> + oyta_device::PoolOps<T> + oyta_device::RnnOps<T>
+{
+    // -------- Conv1d backward --------
+
+    /// Conv1d backward — 输入梯度 dx
+    pub fn conv1d_bwd_dx(
+        &self, dy: &Tensor<T, D>, weight: &Tensor<T, D>,
+        padding: usize, stride: usize, dilation: usize,
+    ) -> Result<Tensor<T, D>, TensorError> {
+        let dy_s = dy.shape().dims.clone();
+        let w_s = weight.shape().dims.clone();
+        let dx_shape = self.shape().dims.clone();
+        let total = dx_shape[0] * dx_shape[1] * dx_shape[2];
+        let mut dx_data = vec![T::from_f32(0.0); total];
+        unsafe {
+            D::conv1d_bwd_dx(
+                dy.data_slice().as_ptr(), [dy_s[0], dy_s[1], dy_s[2]],
+                weight.data_slice().as_ptr(), [w_s[0], w_s[1], w_s[2]],
+                dx_data.as_mut_ptr(), [dx_shape[0], dx_shape[1], dx_shape[2]],
+                padding, stride, dilation,
+            );
+        }
+        Tensor::from_data(dx_data, dx_shape)
+    }
+
+    /// Conv1d backward — 权重梯度 dw + 偏置梯度 db
+    pub fn conv1d_bwd_dwdb(
+        dy: &Tensor<T, D>, x_fwd: &Tensor<T, D>,
+        weight_shape: [usize; 3], bias_shape: [usize; 1],
+        padding: usize, stride: usize, dilation: usize,
+    ) -> Result<(Tensor<T, D>, Tensor<T, D>), TensorError> {
+        let dy_s = dy.shape().dims.clone();
+        let x_s = x_fwd.shape().dims.clone();
+        let dw_total = weight_shape[0] * weight_shape[1] * weight_shape[2];
+        let db_total = bias_shape[0];
+        let mut dw_data = vec![T::from_f32(0.0); dw_total];
+        let mut db_data = vec![T::from_f32(0.0); db_total];
+        unsafe {
+            D::conv1d_bwd_dwdb(
+                dy.data_slice().as_ptr(), [dy_s[0], dy_s[1], dy_s[2]],
+                x_fwd.data_slice().as_ptr(), [x_s[0], x_s[1], x_s[2]],
+                dw_data.as_mut_ptr(), weight_shape,
+                db_data.as_mut_ptr(), bias_shape,
+                padding, stride, dilation,
+            );
+        }
+        let dw = Tensor::from_data(dw_data, vec![weight_shape[0], weight_shape[1], weight_shape[2]])?;
+        let db = Tensor::from_data(db_data, vec![bias_shape[0]])?;
+        Ok((dw, db))
+    }
+
+    // -------- BatchNorm backward --------
+
+    /// BN1d backward — 同时计算 dgamma / dbeta / dx
+    ///
+    /// # 参数
+    /// - dy: 上游梯度
+    /// - x_norm: forward 缓存的归一化输入（x_norm = (x - mean) / sqrt(var + eps)）
+    pub fn batchnorm1d_bwd(
+        &self, x_norm: &Tensor<T, D>, gamma: &Tensor<T, D>, eps: f32,
+    ) -> Result<(Tensor<T, D>, Tensor<T, D>, Tensor<T, D>), TensorError> {
+        let dy_shape = self.shape().dims.clone();
+        let feat_dim = dy_shape[dy_shape.len() - 1];
+        let total: usize = dy_shape.iter().product();
+        let mut dx_data = vec![T::from_f32(0.0); total];
+        let mut dgamma_data = vec![T::from_f32(0.0); feat_dim];
+        let mut dbeta_data = vec![T::from_f32(0.0); feat_dim];
+        unsafe {
+            D::batchnorm1d_bwd(
+                self.data_slice().as_ptr(), &dy_shape,
+                x_norm.data_slice().as_ptr(),
+                gamma.data_slice().as_ptr(),
+                dgamma_data.as_mut_ptr(), dbeta_data.as_mut_ptr(),
+                dx_data.as_mut_ptr(), &dy_shape,
+                eps,
+            );
+        }
+        let dx = Tensor::from_data(dx_data, dy_shape.clone())?;
+        let dgamma = Tensor::from_data(dgamma_data, vec![feat_dim])?;
+        let dbeta = Tensor::from_data(dbeta_data, vec![feat_dim])?;
+        Ok((dgamma, dbeta, dx))
+    }
+
+    // -------- Pool backward --------
+
+    /// MaxPool1d backward — 根据 argmax 缓存把梯度稀疏传回
+    ///
+    /// 注意：argmax 缓存来自 fwd（maxpool1d 返回的 Tensor 不携带 argmax）
+    /// 调用方需要在 fwd 时自己保存 argmax。底层 argmax 类型是 i64 Vec。
+    pub fn maxpool1d_bwd(
+        &self, argmax_cache: &[i64], dx_shape: &[usize],
+    ) -> Result<Tensor<T, D>, TensorError> {
+        let dy_shape = self.shape().dims.clone();
+        let mut dx_data = vec![T::from_f32(0.0); dx_shape.iter().product::<usize>()];
+        unsafe {
+            D::maxpool1d_bwd(
+                self.data_slice().as_ptr(), &dy_shape,
+                argmax_cache.as_ptr(),
+                dx_data.as_mut_ptr(), dx_shape,
+            );
+        }
+        Tensor::from_data(dx_data, dx_shape.to_vec())
+    }
+
+    /// AvgPool1d backward — 梯度均匀分配
+    pub fn avgpool1d_bwd(
+        &self, dx_shape: &[usize],
+        kernel: usize, stride: usize, padding: usize,
+    ) -> Result<Tensor<T, D>, TensorError> {
+        let dy_shape = self.shape().dims.clone();
+        let mut dx_data = vec![T::from_f32(0.0); dx_shape.iter().product::<usize>()];
+        unsafe {
+            D::avgpool1d_bwd(
+                self.data_slice().as_ptr(), &dy_shape,
+                dx_data.as_mut_ptr(), dx_shape,
+                kernel, stride, padding,
+            );
+        }
+        Tensor::from_data(dx_data, dx_shape.to_vec())
+    }
+
+    // -------- GRU / LSTM step wrapper --------
+
+    /// GRU 单 step
+    ///
+    /// # 参数
+    /// - input: [in_size] 当前输入
+    /// - h_prev: [hidden_size] 上一时刻隐藏状态
+    /// - weights: [3*H, in_size + hidden_size] 拼接权重（z/r/n 顺序）
+    /// - bias: [3*H] 拼接偏置
+    /// - hidden_size: 隐藏状态维度
+    pub fn gru_step(
+        input: &Tensor<T, D>, h_prev: &Tensor<T, D>,
+        weights: &Tensor<T, D>, bias: &Tensor<T, D>, hidden_size: usize,
+    ) -> Result<Tensor<T, D>, TensorError> {
+        let in_size = input.numel();
+        let mut h_new_data = vec![T::from_f32(0.0); hidden_size];
+        unsafe {
+            D::gru_step(
+                input.data_slice().as_ptr(), in_size,
+                h_prev.data_slice().as_ptr(), hidden_size,
+                h_new_data.as_mut_ptr(),
+                weights.data_slice().as_ptr(), bias.data_slice().as_ptr(),
+            );
+        }
+        Tensor::from_data(h_new_data, vec![hidden_size])
+    }
+
+    /// LSTM 单 step — 返回 (h_new, c_new)
+    ///
+    /// # 参数
+    /// - input: [in_size]
+    /// - h_prev: [hidden_size] 上一时刻隐藏状态
+    /// - c_prev: [hidden_size] 上一时刻细胞状态
+    /// - weights: [4*H, in_size + hidden_size] 拼接权重（i/f/g/o 顺序）
+    /// - bias: [4*H] 拼接偏置
+    pub fn lstm_step(
+        input: &Tensor<T, D>, h_prev: &Tensor<T, D>, c_prev: &Tensor<T, D>,
+        weights: &Tensor<T, D>, bias: &Tensor<T, D>, hidden_size: usize,
+    ) -> Result<(Tensor<T, D>, Tensor<T, D>), TensorError> {
+        let in_size = input.numel();
+        let mut h_new = vec![T::from_f32(0.0); hidden_size];
+        let mut c_new = vec![T::from_f32(0.0); hidden_size];
+        unsafe {
+            D::lstm_step(
+                input.data_slice().as_ptr(), in_size,
+                h_prev.data_slice().as_ptr(), c_prev.data_slice().as_ptr(), hidden_size,
+                h_new.as_mut_ptr(), c_new.as_mut_ptr(),
+                weights.data_slice().as_ptr(), bias.data_slice().as_ptr(),
+            );
+        }
+        Ok((Tensor::from_data(h_new, vec![hidden_size])?, Tensor::from_data(c_new, vec![hidden_size])?))
+    }
+}
