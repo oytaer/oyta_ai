@@ -32,6 +32,10 @@ fn main() {
                 "layernorm.cu",
                 "matmul.cu",
                 "flash_attn.cu",
+                "conv1d.cu",
+                "batchnorm.cu",
+                "pool1d.cu",
+                "rnn.cu",
             ] {
                 build.file(dir.join(k));
             }
