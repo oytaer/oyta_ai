@@ -31,6 +31,10 @@ pub use backend::matmul::MatmulOps;
 pub use backend::flash_attn::FlashAttentionOps;
 pub use backend::fused::FusedOps;
 pub use backend::inplace::InPlaceOps;
+pub use backend::conv1d::Conv1dOps;
+pub use backend::batchnorm::BatchNormOps;
+pub use backend::pool::PoolOps;
+pub use backend::rnn::RnnOps;
 
 // --- Backend 聚合 + Device 相关 ---
 pub use backend::aggregate::{

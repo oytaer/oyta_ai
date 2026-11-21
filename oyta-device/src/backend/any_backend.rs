@@ -13,6 +13,10 @@ use crate::backend::matmul::MatmulOps;
 use crate::backend::flash_attn::FlashAttentionOps;
 use crate::backend::fused::FusedOps;
 use crate::backend::inplace::InPlaceOps;
+use crate::backend::conv1d::Conv1dOps;
+use crate::backend::batchnorm::BatchNormOps;
+use crate::backend::pool::PoolOps;
+use crate::backend::rnn::RnnOps;
 use crate::backend::aggregate::Backend;
 use crate::Cpu;
 #[cfg(feature = "cuda")]
@@ -69,6 +73,10 @@ impl<T: Float + Accumulate> ReduceOps<T> for AnyBackend {}
 impl<T: Float> FlashAttentionOps<T> for AnyBackend {}
 impl<T: Float + Accumulate> FusedOps<T> for AnyBackend {}
 impl<T: Float> InPlaceOps<T> for AnyBackend {}
+impl<T: Float> Conv1dOps<T> for AnyBackend {}
+impl<T: Float> BatchNormOps<T> for AnyBackend {}
+impl<T: Float> PoolOps<T> for AnyBackend {}
+impl<T: Float> RnnOps<T> for AnyBackend {}
 
 // MatmulOps：dispatch（有硬件重写 cublasSgemm / wgsl matmul shader）
 impl MatmulOps for AnyBackend {

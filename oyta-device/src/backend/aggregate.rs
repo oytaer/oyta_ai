@@ -10,6 +10,10 @@ use crate::backend::matmul::MatmulOps;
 use crate::backend::flash_attn::FlashAttentionOps;
 use crate::backend::fused::FusedOps;
 use crate::backend::inplace::InPlaceOps;
+use crate::backend::conv1d::Conv1dOps;
+use crate::backend::batchnorm::BatchNormOps;
+use crate::backend::pool::PoolOps;
+use crate::backend::rnn::RnnOps;
 
 // ============================================================
 // broadcast_strides：从 shape 计算 contiguous strides
@@ -47,6 +51,10 @@ pub trait Backend:
     MatmulOps +
     FusedOps<f32> + FusedOps<F16> + FusedOps<BF16> +
     InPlaceOps<f32> + InPlaceOps<F16> + InPlaceOps<BF16> +
+    Conv1dOps<f32> + Conv1dOps<F16> + Conv1dOps<BF16> +
+    BatchNormOps<f32> + BatchNormOps<F16> + BatchNormOps<BF16> +
+    PoolOps<f32> + PoolOps<F16> + PoolOps<BF16> +
+    RnnOps<f32> + RnnOps<F16> + RnnOps<BF16> +
     Copy + Clone + Send + Sync + 'static
 {
     // ============================================================
@@ -111,6 +119,15 @@ pub enum OpKind {
     Swiglu,
     /// 形状变换
     Reshape, Contiguous, Transpose, Permute,
+    /// Conv1d
+    Conv1dForward, Conv1dBackward,
+    /// BatchNorm
+    BN1dForward, BN1dBackward,
+    /// Pooling
+    MaxPool1dForward, MaxPool1dBackward,
+    AvgPool1dForward, AvgPool1dBackward,
+    /// RNN step
+    GruStep, LstmStep,
 }
 
 /// 激活函数类型

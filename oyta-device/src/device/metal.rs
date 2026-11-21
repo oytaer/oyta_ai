@@ -35,6 +35,10 @@ impl<T: crate::dtype::float_trait::Float + crate::dtype::float_trait::Accumulate
 impl<T: crate::dtype::float_trait::Float> crate::backend::inplace::InPlaceOps<T> for Metal {}
 #[cfg(feature = "metal")]
 impl crate::backend::matmul::MatmulOps for Metal {}
+impl<T: crate::dtype::float_trait::Float> crate::backend::conv1d::Conv1dOps<T> for Metal {}
+impl<T: crate::dtype::float_trait::Float> crate::backend::batchnorm::BatchNormOps<T> for Metal {}
+impl<T: crate::dtype::float_trait::Float> crate::backend::pool::PoolOps<T> for Metal {}
+impl<T: crate::dtype::float_trait::Float> crate::backend::rnn::RnnOps<T> for Metal {}
 
 // Backend impl
 #[cfg(feature = "metal")]

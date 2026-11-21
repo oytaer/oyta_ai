@@ -25,6 +25,10 @@ impl<T: Float + Accumulate> crate::backend::fused::FusedOps<T> for Cpu {}
 impl<T: Float> crate::backend::inplace::InPlaceOps<T> for Cpu {}
 // MatmulOps 无泛型参数（f32* 签名）
 impl crate::backend::matmul::MatmulOps for Cpu {}
+impl<T: Float> crate::backend::conv1d::Conv1dOps<T> for Cpu {}
+impl<T: Float> crate::backend::batchnorm::BatchNormOps<T> for Cpu {}
+impl<T: Float> crate::backend::pool::PoolOps<T> for Cpu {}
+impl<T: Float> crate::backend::rnn::RnnOps<T> for Cpu {}
 
 // Backend 聚合 impl（关联常量提供编译期设备属性）
 // 上面 6 个 blanket impl + MatmulOps 已满足 Backend bound 的所有泛型实例

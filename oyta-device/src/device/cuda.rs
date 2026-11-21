@@ -96,6 +96,10 @@ impl<T: crate::dtype::float_trait::Float> crate::backend::flash_attn::FlashAtten
 impl<T: crate::dtype::float_trait::Float + crate::dtype::float_trait::Accumulate> crate::backend::fused::FusedOps<T> for Cuda {}
 #[cfg(feature = "cuda")]
 impl<T: crate::dtype::float_trait::Float> crate::backend::inplace::InPlaceOps<T> for Cuda {}
+impl<T: crate::dtype::float_trait::Float> crate::backend::conv1d::Conv1dOps<T> for Cuda {}
+impl<T: crate::dtype::float_trait::Float> crate::backend::batchnorm::BatchNormOps<T> for Cuda {}
+impl<T: crate::dtype::float_trait::Float> crate::backend::pool::PoolOps<T> for Cuda {}
+impl<T: crate::dtype::float_trait::Float> crate::backend::rnn::RnnOps<T> for Cuda {}
 
 // ======== Backend trait ========
 #[cfg(feature = "cuda")]

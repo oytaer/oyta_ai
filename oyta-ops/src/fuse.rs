@@ -119,5 +119,15 @@ pub fn op_kind_name(kind: OpKind) -> &'static str {
             ActivationType::Tanh => "activation_tanh",
             ActivationType::None => "activation_none",
         },
+        OpKind::Conv1dForward => "conv1d_fwd",
+        OpKind::Conv1dBackward => "conv1d_bwd",
+        OpKind::BN1dForward => "bn1d_fwd",
+        OpKind::BN1dBackward => "bn1d_bwd",
+        OpKind::MaxPool1dForward => "maxpool1d_fwd",
+        OpKind::MaxPool1dBackward => "maxpool1d_bwd",
+        OpKind::AvgPool1dForward => "avgpool1d_fwd",
+        OpKind::AvgPool1dBackward => "avgpool1d_bwd",
+        OpKind::GruStep => "gru_step",
+        OpKind::LstmStep => "lstm_step",
     }
 }

@@ -40,6 +40,10 @@ impl<T: crate::dtype::float_trait::Float> crate::backend::flash_attn::FlashAtten
 impl<T: crate::dtype::float_trait::Float + crate::dtype::float_trait::Accumulate> crate::backend::fused::FusedOps<T> for Wgpu {}
 #[cfg(feature = "wgpu")]
 impl<T: crate::dtype::float_trait::Float> crate::backend::inplace::InPlaceOps<T> for Wgpu {}
+impl<T: crate::dtype::float_trait::Float> crate::backend::conv1d::Conv1dOps<T> for Wgpu {}
+impl<T: crate::dtype::float_trait::Float> crate::backend::batchnorm::BatchNormOps<T> for Wgpu {}
+impl<T: crate::dtype::float_trait::Float> crate::backend::pool::PoolOps<T> for Wgpu {}
+impl<T: crate::dtype::float_trait::Float> crate::backend::rnn::RnnOps<T> for Wgpu {}
 
 // 运行时 probe：检测 GPU adapter
 #[cfg(feature = "wgpu")]

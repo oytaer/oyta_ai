@@ -4,6 +4,7 @@ pub mod base;
 pub mod shape;
 pub mod data;
 pub mod ops;
+pub mod tensor_ml;
 pub mod reduce;
 pub mod factory;
 pub mod dtype;
